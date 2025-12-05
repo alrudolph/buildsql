@@ -9,7 +9,7 @@ from typing import Literal, Optional
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
-from buildsql import select, and_
+from buildsql import and_, delete_from, insert_into, select, update
 
 # Create in-memory SQLite engine
 eng = create_engine("sqlite:///:memory:", echo=True)
@@ -42,6 +42,21 @@ with Session(eng) as ses:
     # stmt = select(text("*")).select_from(text("users"))
     rows = ses.execute(text(sql)).fetchall()
     print(rows)
+
+    update("users").set("").build()
+    update("users").set("").where("").build()
+    update("users").set("").from_("").where("").build()
+    update("users").set("").from_("").where("").returning("").build()
+    update("users").set("").returning("").build()
+
+    delete_from("users").using("").where("").returning("").build()
+    delete_from("users").where("").returning("").build()
+    delete_from("users").returning("").build()
+
+    insert_into("asd", []).values("").build()
+    insert_into("asd", []).values("").on_conflict("").build()
+    insert_into("asd", []).values("").returning("").build()
+    insert_into("asd", []).values("").on_conflict("").returning("").build()
 
 quit()
 
@@ -83,7 +98,7 @@ root = (
 # json functions: json_extract, json_set, json_remove
 # array functions: array_length, array_append, array_prepend
 # etc.
-# 
+#
 # Date helpers -- timezone, interval, trunc, format...
 #
 # create table, schema, index, user, ... (admin)

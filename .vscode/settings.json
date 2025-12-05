@@ -1,0 +1,20 @@
+{
+    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit" // or "always"
+        }
+    },
+    "python.defaultInterpreterPath": "./python/.venv/bin/python",
+    "black-formatter.interpreter":[
+        "./python/.venv/bin/python"
+    ],
+    "isort.interpreter": [
+        "./python/.venv/bin/python"
+    ],
+    "isort.args": [
+        "--profile",
+        "black"
+    ]
+}

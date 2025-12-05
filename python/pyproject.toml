@@ -22,3 +22,5 @@ packages = ["buildsql"]
 [tool.setuptools.package-data]
 "buildsql" = ["py.typed"]
 
+[tool.isort]
+profile = "black"

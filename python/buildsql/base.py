@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Literal
+from typing import Literal, Optional
 
 
 class Buildable:
@@ -36,4 +36,3 @@ IntOrTerminal = int | Terminal
 
 OrderDirection = Literal["asc", "desc"]
 BaseOrderT = StrOrTerminal | tuple[StrOrTerminal, OrderDirection]
-

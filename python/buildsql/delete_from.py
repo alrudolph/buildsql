@@ -40,49 +40,33 @@ class Whereable(ReturningAble):
         return ReturningAble([*self._parts, Where(condition)])
 
 
-class From(Buildable):
+class Using(Buildable):
 
-    def __init__(self, table: StrOrTerminal) -> None:
-        self._table = table
-
-    def build(self) -> str:
-        table = get_value(self._table)
-        return f"from {table}"
-
-
-class Fromeable(Whereable):
-
-    def from_(self, table: StrOrTerminal) -> Whereable:
-        return Whereable([*self._parts, From(table)])
-
-
-class Set(Buildable):
-
-    def __init__(self, set_clause: StrOrTerminal) -> None:
-        self._set_clause = set_clause
+    def __init__(self, using_clause: StrOrTerminal) -> None:
+        self._using_clause = using_clause
 
     def build(self) -> str:
-        set_clause = get_value(self._set_clause)
-        return f"set {set_clause}"
+        using_clause = get_value(self._using_clause)
+        return f"using {using_clause}"
 
 
-class Setable:
+class Usingable(Whereable):
 
-    def __init__(self, update: Update) -> None:
-        self._parts = [update]
+    def __init__(self, delete_from: DeleteFrom) -> None:
+        self._parts = [delete_from]
 
-    def set(self, set_clause: StrOrTerminal) -> Fromeable:
-        return Fromeable([*self._parts, Set(set_clause)])
+    def using(self, using_clause: StrOrTerminal) -> Whereable:
+        return Whereable([*self._parts, Using(using_clause)])
 
 
-class Update(Buildable):
+class DeleteFrom(Buildable):
 
     def __init__(self, table_name: str) -> None:
         self._table_name = table_name
 
     def build(self) -> str:
-        return f"update {self._table_name}"
+        return f"delete from {self._table_name}"
 
 
-def update(table_name: str) -> Setable:
-    return Setable(Update(table_name))
+def delete_from(table_name: str) -> Usingable:
+    return Usingable(DeleteFrom(table_name))
