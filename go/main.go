@@ -11,7 +11,7 @@ func main() {
 		sql.Query().Order(sql.Col("name"), sql.Desc("age")).Build(),
 		sql.Query().Order(sql.Col("name")).Limit(1).Build(),
 		sql.Query().
-			Order(sql.Col("name"), sql.Desc("age"), sql.Desc("age"), sql.Desc("age"), sql.Desc("age")).
+			Order(sql.Col("name"), sql.Desc("age")).
 			Limit(2).
 			Build(),
 	}
