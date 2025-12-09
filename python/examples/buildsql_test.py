@@ -9,7 +9,7 @@ from typing import Literal, Optional
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
-from buildsql import and_, delete_from, insert_into, select, update
+from buildsql import and_, delete_from, insert_into, select, update, select_distinct
 
 # Create in-memory SQLite engine
 eng = create_engine("sqlite:///:memory:", echo=True)
@@ -128,7 +128,10 @@ root = (
     .having("some-cond")
     .order_by(("asd", "desc"))
     .limit(10)
+    .fetch("first", 10, "with ties")
 )
+
+select_distinct("*").on("").from_("users").fetch("first", 10, "with ties")
 
 root = select("*").from_("users").having("some-cond")
 # TODO: need to handle subquery builds.....
@@ -165,3 +168,12 @@ with Session(eng) as ses:
     # stmt = select(text("*")).select_from(text("users"))
     rows = ses.execute(text(sql)).fetchall()
     print(rows)
+
+(
+    select("*")
+    .from_("companies")
+    .where("company_id < %(company_id)s")
+    .order_by(("company_id", "desc"))
+    .limit("%(limit)s")
+    .build()
+),

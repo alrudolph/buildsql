@@ -19,6 +19,7 @@ class Returning(Buildable):
 class ReturningAble(Terminal):
 
     def returning(self, returning: StrOrTerminal) -> Terminal:
+        # hmm i'm thinking this should take in args
         return Terminal([*self._parts, Returning(returning)])
 
 
@@ -34,7 +35,18 @@ class OnConflict(Buildable):
 
 class OnConflictAble(ReturningAble):
 
+    def on_conflict_do_update_set(self, set_clause: StrOrTerminal) -> ReturningAble:
+        # * hmm i'm thinking this should take in args
+        # * just a shortcut to remember the syntax, make it look a little more like update?
+        return ReturningAble([*self._parts, OnConflict(f"do update set {set_clause}")])
+
+    def on_conflict_do_nothing(self) -> ReturningAble:
+        # * hmm i'm thinking this should take in args
+        # * just a shortcut to remember the syntax / less stringly typed
+        return ReturningAble([*self._parts, OnConflict("do nothing")])
+
     def on_conflict(self, on_conflict_clause: StrOrTerminal) -> ReturningAble:
+        # this method isn't preferred over the other two, idk could remove
         return ReturningAble([*self._parts, OnConflict(on_conflict_clause)])
 
 
@@ -45,12 +57,13 @@ class Values(Buildable):
 
     def build(self) -> str:
         values_clause = get_value(self._values_clause)
-        return f"values {values_clause}"
+        return f"values ({values_clause})"
 
 
 class ValuesAble:
 
     def values(self, values_clause: StrOrTerminal) -> OnConflictAble:
+        # hmm i'm thinking this should take in args
         return OnConflictAble([*self._parts, Values(values_clause)])
 
 
@@ -77,6 +90,7 @@ class Insertable(ValuesAble):
 
 
 def insert_into(table: StrOrTerminal, column_names: list[str]) -> Insertable:
+    # TODO: have `as`?
     return Insertable(InsertInto(table, column_names))
 
 

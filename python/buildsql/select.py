@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from typing import Literal, Optional
 from .base import (
     BaseOrderT,
     Buildable,
@@ -7,7 +7,61 @@ from .base import (
     StrOrTerminal,
     Terminal,
     get_value,
+    StrOrBuildable,
 )
+from .utils import join_with_commas
+
+FetchDirection = Literal["first", "next"]
+FetchTieType = Literal["only", "with ties"]
+
+
+class Fetch(Buildable):
+
+    def __init__(
+        self, direction: FetchDirection, fetch: IntOrTerminal, tie: FetchTieType
+    ) -> None:
+        self._direction = direction
+        self._fetch = fetch
+        self._tie = tie
+
+    def build(self) -> str:
+        fetch = get_value(self._fetch)
+
+        if fetch == 1 and self._tie == "only":
+            return f"fetch {self._direction} row only"
+
+        return f"fetch {self._direction} {fetch} rows {self._tie}"
+
+
+class Fetchable(Terminal):
+
+    def fetch(
+        self,
+        direction: FetchDirection,
+        fetch: IntOrTerminal,
+        tie: FetchTieType,
+    ) -> Terminal:
+        return Terminal([*self._parts, Fetch(direction, fetch, tie)])
+
+
+class Offset(Buildable):
+
+    def __init__(self, offset: IntOrTerminal) -> None:
+        self._offset = offset
+
+    def build(self) -> str:
+        offset = get_value(self._offset)
+
+        if offset == 0:
+            return "offset 1 row"
+
+        return f"offset {offset} rows"
+
+
+class Offsetable(Fetchable):
+
+    def offset(self, offset: IntOrTerminal) -> Fetchable:
+        return Fetchable([*self._parts, Offset(offset)])
 
 
 class Limit(Buildable):
@@ -20,12 +74,12 @@ class Limit(Buildable):
         return f"limit {limit}"
 
 
-class Limitable(Terminal):
+class Limitable(Offsetable):
 
     # TODO: required 1 or optional 1
     # limit 2 - only 1...
-    def limit(self, limit: IntOrTerminal) -> Terminal:
-        return Terminal([*self._parts, Limit(limit)])
+    def limit(self, limit: IntOrTerminal) -> Offsetable:
+        return Offsetable([*self._parts, Limit(limit)])
 
 
 class Order(Buildable):
@@ -43,7 +97,7 @@ class Order(Buildable):
             else:
                 cols.append(get_value(col))
 
-        return f"order by {', '.join(cols)}"
+        return f"order by {join_with_commas(cols)}"
 
 
 class Orderable(Limitable):
@@ -74,8 +128,7 @@ class GroupBy(Buildable):
         self._columns = columns
 
     def build(self) -> str:
-        cols = [get_value(col) for col in self._columns]
-        return f"group by {', '.join(cols)}"
+        return f"group by {join_with_commas(self._columns)}"
 
 
 class GroupByable(Orderable):
@@ -198,13 +251,42 @@ class From(Buildable):
         return f"from {table}"
 
 
-class Fromable:
+class Fromable(Terminal):
 
     def __init__(self, select: Select) -> None:
         self._parts = [select]
 
     def from_(self, table: StrOrTerminal) -> BaseJoinable:
         return BaseJoinable([*self._parts, From(table)])
+
+
+class MustFromable:
+
+    def __init__(self, parts: Optional[list[StrOrBuildable]] = None) -> None:
+        if parts is None:
+            parts = []
+
+        self._parts = parts
+
+    def from_(self, table: StrOrTerminal) -> BaseJoinable:
+        return BaseJoinable([*self._parts, From(table)])
+
+
+class SelectDistinctOnable(Fromable):
+
+    def __init__(self, select_distinct: SelectDistinct) -> None:
+        self._parts = [select_distinct]
+        self._select_distinct = select_distinct
+
+    def on(self, on_col_1: StrOrTerminal, *on_columns: StrOrTerminal) -> MustFromable:
+        return MustFromable(
+            [
+                SelectDistinctOn(
+                    [on_col_1, *on_columns],
+                    self._select_distinct._columns,
+                )
+            ]
+        )
 
 
 class Select(Buildable):
@@ -214,27 +296,45 @@ class Select(Buildable):
         self._columns = columns
 
     def build(self) -> str:
-        cols = [get_value(col) for col in self._columns]
-        return f"select {', '.join(cols)}"
+        return f"select {join_with_commas(self._columns)}"
 
 
-class Selectable:
+class SelectDistinct(Buildable):
 
-    def select(self, col_1: StrOrTerminal, *columns: StrOrTerminal) -> Fromable:
-        return Fromable(Select(col_1, *columns))
+    def __init__(self, *columns: StrOrTerminal) -> None:
+        self._columns = columns
+
+    def build(self) -> str:
+        return f"select distinct {join_with_commas(self._columns)}"
 
 
-class Root(Selectable): ...
+class SelectDistinctOn(Buildable):
+
+    def __init__(
+        self,
+        on_columns: list[StrOrTerminal],
+        columns: StrOrTerminal,
+    ) -> None:
+        self._on_columns = on_columns
+        self._columns = columns
+
+    def build(self) -> str:
+        return f"select distinct on ({join_with_commas(self._on_columns)}) {join_with_commas(self._columns)}"
 
 
 def select(col_1: StrOrTerminal, *columns: StrOrTerminal) -> Fromable:
     return Fromable(Select(col_1, *columns))
 
 
+def select_distinct(
+    col_1: StrOrTerminal,
+    *columns: StrOrTerminal,
+) -> SelectDistinctOnable:
+    return SelectDistinctOnable(SelectDistinct(col_1, *columns))
+
+
 # TODO: https://www.postgresql.org/docs/current/sql-select.html
 #
 # * window
-# * union / intersect / except, all / distinct
-# * offset
-# * fetch
+# * union / intersect / except
 # * for

@@ -1,11 +1,7 @@
 from __future__ import annotations
 
-from .base import (
-    Buildable,
-    StrOrTerminal,
-    Terminal,
-    get_value,
-)
+from .base import Buildable, StrOrTerminal, Terminal, get_value, StrOrBuildable
+from typing import Optional
 
 
 class Returning(Buildable):
@@ -21,6 +17,7 @@ class Returning(Buildable):
 class ReturningAble(Terminal):
 
     def returning(self, returning: StrOrTerminal) -> Terminal:
+        # hmm i'm thinking this should take in args
         return Terminal([*self._parts, Returning(returning)])
 
 
@@ -35,6 +32,18 @@ class Where(Buildable):
 
 
 class Whereable(ReturningAble):
+
+    def where(self, condition: StrOrTerminal) -> ReturningAble:
+        return ReturningAble([*self._parts, Where(condition)])
+
+
+class MustWhereable:
+
+    def __init__(self, parts: Optional[list[StrOrBuildable]] = None) -> None:
+        if parts is None:
+            parts = []
+
+        self._parts = parts
 
     def where(self, condition: StrOrTerminal) -> ReturningAble:
         return ReturningAble([*self._parts, Where(condition)])
@@ -55,8 +64,8 @@ class Usingable(Whereable):
     def __init__(self, delete_from: DeleteFrom) -> None:
         self._parts = [delete_from]
 
-    def using(self, using_clause: StrOrTerminal) -> Whereable:
-        return Whereable([*self._parts, Using(using_clause)])
+    def using(self, using_clause: StrOrTerminal) -> MustWhereable:
+        return MustWhereable([*self._parts, Using(using_clause)])
 
 
 class DeleteFrom(Buildable):

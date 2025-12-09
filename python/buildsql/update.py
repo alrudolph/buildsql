@@ -21,6 +21,7 @@ class Returning(Buildable):
 class ReturningAble(Terminal):
 
     def returning(self, returning: StrOrTerminal) -> Terminal:
+        # hmm i'm thinking this should take in args
         return Terminal([*self._parts, Returning(returning)])
 
 
@@ -72,6 +73,7 @@ class Setable:
         self._parts = [update]
 
     def set(self, set_clause: StrOrTerminal) -> Fromeable:
+        # hmm i'm thinking this should take in args
         return Fromeable([*self._parts, Set(set_clause)])
 
 
