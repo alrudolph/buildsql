@@ -1,4 +1,4 @@
-from buildsql import and_, or_, in_
+from buildsql import and_, in_, or_
 
 
 class TestAnd:

@@ -47,6 +47,68 @@ class TestSelect:
         sql = select("1").from_("table1").fetch("first", 10, "only").build()
         assert sql == "select 1\nfrom table1\nfetch first 10 rows only"
 
+    def test_select_inner_join(self) -> None:
+        sql = (
+            select("1")
+            .from_("table1")
+            .inner_join("table2", on="table1.id = table2.t1_id")
+            .build()
+        )
+        assert (
+            sql
+            == "select 1\nfrom table1\ninner join table2 on table1.id = table2.t1_id"
+        )
+
+    def test_select_left_join(self) -> None:
+        sql = (
+            select("1")
+            .from_("table1")
+            .left_join("table2", on="table1.id = table2.t1_id")
+            .build()
+        )
+        assert (
+            sql == "select 1\nfrom table1\nleft join table2 on table1.id = table2.t1_id"
+        )
+
+    def test_select_right_join(self) -> None:
+        sql = (
+            select("1")
+            .from_("table1")
+            .right_join("table2", on="table1.id = table2.t1_id")
+            .build()
+        )
+        assert (
+            sql
+            == "select 1\nfrom table1\nright join table2 on table1.id = table2.t1_id"
+        )
+
+    def test_select_full_join(self) -> None:
+        sql = (
+            select("1")
+            .from_("table1")
+            .full_join("table2", on="table1.id = table2.t1_id")
+            .build()
+        )
+        assert (
+            sql == "select 1\nfrom table1\nfull join table2 on table1.id = table2.t1_id"
+        )
+
+    def test_select_cross_join(self) -> None:
+        sql = select("1").from_("table1").cross_join("table2").build()
+        assert sql == "select 1\nfrom table1\ncross join table2"
+
+    def test_select_lateral_join(self) -> None:
+        sql = (
+            select("1")
+            .from_("table1")
+            .lateral_join("table2", on="table1.id = table2.t1_id")
+            .build()
+        )
+        assert (
+            sql
+            == "select 1\nfrom table1\nlateral join table2 on table1.id = table2.t1_id"
+        )
+
 
 class TestSelectDistinct:
 
