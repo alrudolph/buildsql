@@ -23,6 +23,7 @@ jobs:
 
       - name: "Set up Python"
         uses: actions/setup-python@v6
+        working-directory: ./python
         with:
           python-version-file: ".python-version"
 
@@ -37,5 +38,6 @@ jobs:
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        working-directory: ./python
         with:
           repository-url: https://test.pypi.org/legacy/
