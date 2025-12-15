@@ -10,3 +10,6 @@ wheels/
 # Virtual environments
 .venv
 uv.lock
+
+.pytest_cache/
+.ruff_cache/

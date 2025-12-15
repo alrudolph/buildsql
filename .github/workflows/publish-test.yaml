@@ -5,8 +5,11 @@ on:
     branches:
       - main
 
-jobs:
+defaults:
+  run:
+    working-directory: ./python
 
+jobs:
   pypi-publish:
     name: Publish release to PyPI
     runs-on: ubuntu-latest
