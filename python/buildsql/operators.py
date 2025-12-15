@@ -34,3 +34,12 @@ def in_(column: StrOrTerminal, values: Sequence[StrOrTerminal]) -> StrOrTerminal
     """
     vals = ", ".join(get_value(val) for val in values)
     return f"{get_value(column)} in ({vals})"
+
+
+def eq(column: StrOrTerminal, value: StrOrTerminal) -> StrOrTerminal:
+    """Create an equality condition for SQL statements.
+
+    TODO: link to docs.
+    TODO: example usage
+    """
+    return f"{get_value(column)} = {get_value(value)}"

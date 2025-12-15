@@ -1,4 +1,5 @@
 from .base import StrOrTerminal, get_value
+from collections.abc import Sequence
 
 
 def wrap_parentheses(value: StrOrTerminal) -> StrOrTerminal:
@@ -20,7 +21,7 @@ def join_conditions(
     return wrap_parentheses(joined)
 
 
-def join_with_commas(items: StrOrTerminal) -> StrOrTerminal:
+def join_with_commas(items: Sequence[StrOrTerminal]) -> StrOrTerminal:
     values = (get_value(item) for item in items)
     joined = ", ".join(values)
     return joined

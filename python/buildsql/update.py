@@ -8,17 +8,18 @@ from .base import (
     Terminal,
     get_value,
 )
+from .utils import join_with_commas
 
 
 class Returning(Buildable):
     """Represents a RETURNING clause of an UPDATE statement."""
 
-    def __init__(self, returning: StrOrTerminal) -> None:
+    def __init__(self, *returning: StrOrTerminal) -> None:
         self._returning = returning
 
     def build(self) -> str:
         """Create a RETURNING clause."""
-        returning = get_value(self._returning)
+        returning = join_with_commas(self._returning)
         return f"returning {returning}"
 
 
@@ -27,14 +28,13 @@ class ReturningAble(Terminal):
 
     # TODO: have `return_all` as shortcut for `returning("*")`?
 
-    def returning(self, returning: StrOrTerminal) -> Terminal:
+    def returning(self, col_1: StrOrTerminal, *columns: StrOrTerminal) -> Terminal:
         """Specify which columns to return after the UPDATE.
 
         TODO: link to docs.
         TODO: example usage Show returning updated values vs original values.
         """
-        # hmm i'm thinking this should take in args
-        return Terminal([*self._parts, Returning(returning)])
+        return Terminal([*self._parts, Returning(col_1, *columns)])
 
 
 class Where(Buildable):
@@ -88,12 +88,12 @@ class Fromeable(Whereable):
 class Set(Buildable):
     """Represents a SET clause of an UPDATE statement."""
 
-    def __init__(self, set_clause: StrOrTerminal) -> None:
+    def __init__(self, *set_clause: StrOrTerminal) -> None:
         self._set_clause = set_clause
 
     def build(self) -> str:
         """Create a SET clause."""
-        set_clause = get_value(self._set_clause)
+        set_clause = join_with_commas(self._set_clause)
         return f"set {set_clause}"
 
 
@@ -103,14 +103,13 @@ class Setable:
     def __init__(self, update: Update) -> None:
         self._parts = [update]
 
-    def set(self, set_clause: StrOrTerminal) -> Fromeable:
+    def set(self, *set_clause: StrOrTerminal) -> Fromeable:
         """Define which columns to update.
 
         TODO: link to docs.
         TODO: example usage
         """
-        # hmm i'm thinking this should take in args
-        return Fromeable([*self._parts, Set(set_clause)])
+        return Fromeable([*self._parts, Set(*set_clause)])
 
 
 class Update(Buildable):

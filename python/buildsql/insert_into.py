@@ -6,17 +6,18 @@ from .base import (
     Terminal,
     get_value,
 )
+from .utils import join_with_commas
 
 
 class Returning(Buildable):
     """Represents a RETURNING clause of an INSERT statement."""
 
-    def __init__(self, returning: StrOrTerminal) -> None:
+    def __init__(self, *returning: StrOrTerminal) -> None:
         self._returning = returning
 
     def build(self) -> str:
         """Create a RETURNING clause."""
-        returning = get_value(self._returning)
+        returning = join_with_commas(self._returning)
         return f"returning {returning}"
 
 
@@ -25,15 +26,14 @@ class ReturningAble(Terminal):
 
     # TODO: have `return_all` as shortcut for `returning("*")`?
 
-    def returning(self, returning: StrOrTerminal) -> Terminal:
+    def returning(self, *returning: StrOrTerminal) -> Terminal:
         """Specify which columns to return after the INSERT.
 
         TODO: show example with conflict vs no conflict.
         TODO: link to docs.
         TODO: example usage
         """
-        # hmm i'm thinking this should take in args
-        return Terminal([*self._parts, Returning(returning)])
+        return Terminal([*self._parts, Returning(*returning)])
 
 
 class OnConflict(Buildable):
@@ -51,25 +51,26 @@ class OnConflict(Buildable):
 class OnConflictAble(ReturningAble):
     """Defines the ON CONFLICT clause of an INSERT statement."""
 
-    def on_conflict_do_update_set(self, set_clause: StrOrTerminal) -> ReturningAble:
-        """Specify which columns to update on conflict.
-
-        TODO: link to docs.
-        TODO: example usage
-        """
-        # * hmm i'm thinking this should take in args
-        # * just a shortcut to remember the syntax, make it look a little more like update?
-        return ReturningAble([*self._parts, OnConflict(f"do update set {set_clause}")])
-
-    def on_conflict_do_nothing(self) -> ReturningAble:
-        """Specify that no action should be taken on conflict.
-
-        TODO: link to docs.
-        TODO: example usage
-        """
-        # * hmm i'm thinking this should take in args
-        # * just a shortcut to remember the syntax / less stringly typed
-        return ReturningAble([*self._parts, OnConflict("do nothing")])
+    # Future state??
+    #
+    # on_conflict("col_1", "col_2", where=..., on_constraint=...)
+    # .do_nothing()
+    #
+    # on_conflict("col_1", "col_2", where=..., on_constraint=...)
+    # .do_set_update("set a = 1", "set b = 2", where="...")
+    #
+    # what should be params vs new statement vs inner clauses??
+    #
+    # target = cols("a", "b").where().on_constraint("")
+    #
+    # action = do_update()
+    # .set("a", "b")
+    # .set("c", "d")
+    # .where("...")
+    #
+    # on_conflict(target, action)
+    #
+    # have lambdas to make passing in easier?? idk
 
     def on_conflict(self, on_conflict_clause: StrOrTerminal) -> ReturningAble:
         """Specify the ON CONFLICT clause.
@@ -86,26 +87,25 @@ class OnConflictAble(ReturningAble):
 class Values(Buildable):
     """Represents a VALUES clause of an INSERT statement."""
 
-    def __init__(self, values_clause: StrOrTerminal) -> None:
+    def __init__(self, *values_clause: StrOrTerminal) -> None:
         self._values_clause = values_clause
 
     def build(self) -> str:
         """Create a VALUES clause."""
-        values_clause = get_value(self._values_clause)
+        values_clause = join_with_commas(self._values_clause)
         return f"values ({values_clause})"
 
 
 class ValuesAble:
     """Defines the VALUES clause of an INSERT statement."""
 
-    def values(self, values_clause: StrOrTerminal) -> OnConflictAble:
+    def values(self, *values_clause: StrOrTerminal) -> OnConflictAble:
         """Specify the new values to insert.
 
         TODO: link to docs.
         TODO: example usage
         """
-        # hmm i'm thinking this should take in args
-        return OnConflictAble([*self._parts, Values(values_clause)])
+        return OnConflictAble([*self._parts, Values(*values_clause)])
 
 
 class InsertInto(Buildable):

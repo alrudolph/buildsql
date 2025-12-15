@@ -40,6 +40,7 @@ IntOrBuildable = int | Buildable
 
 StrOrTerminal = str | Terminal
 IntOrTerminal = int | Terminal
+BoolOrTerminal = bool | Terminal
 
 OrderDirection = Literal["asc", "desc"]
 BaseOrderT = StrOrTerminal | tuple[StrOrTerminal, OrderDirection]

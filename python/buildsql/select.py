@@ -418,7 +418,7 @@ class Select(Buildable):
     """Represents a SELECT clause of a SELECT statement."""
 
     # TODO: could also be numbers etc...
-    def __init__(self, *columns: StrOrTerminal) -> None:
+    def __init__(self, columns: StrOrTerminal) -> None:
         self._columns = columns
 
     def build(self) -> str:

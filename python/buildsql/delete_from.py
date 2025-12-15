@@ -5,17 +5,18 @@ from __future__ import annotations
 from typing import Optional
 
 from .base import Buildable, StrOrBuildable, StrOrTerminal, Terminal, get_value
+from .utils import join_with_commas
 
 
 class Returning(Buildable):
     """Represents a RETURNING clause of a DELETE statement."""
 
-    def __init__(self, returning: StrOrTerminal) -> None:
+    def __init__(self, *returning: StrOrTerminal) -> None:
         self._returning = returning
 
     def build(self) -> str:
         """Create a RETURNING clause."""
-        returning = get_value(self._returning)
+        returning = join_with_commas(self._returning)
         return f"returning {returning}"
 
 
@@ -24,14 +25,13 @@ class ReturningAble(Terminal):
 
     # TODO: have `return_all` as shortcut for `returning("*")`?
 
-    def returning(self, returning: StrOrTerminal) -> Terminal:
+    def returning(self, *returning: StrOrTerminal) -> Terminal:
         """Specify which columns to return after the DELETE.
 
         TODO: link to docs.
         TODO: example usage
         """
-        # hmm i'm thinking this should take in args
-        return Terminal([*self._parts, Returning(returning)])
+        return Terminal([*self._parts, Returning(*returning)])
 
 
 class Where(Buildable):
