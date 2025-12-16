@@ -4,9 +4,9 @@
 # TODO: missing a lot of values...
 
 from buildsql.base import Buildable, Terminal
-from typing import Literal, NewType
 
 # TODO: where to put column / expression....
+
 
 class Using(Buildable):
     """Represents a USING clause of a CREATE INDEX statement."""
@@ -17,7 +17,8 @@ class Using(Buildable):
     def build(self) -> str:
         """Create a USING clause."""
         return f"using {self._method}"
-    
+
+
 class UsingAble(Terminal):
     """Defines the USING clause of a CREATE INDEX statement."""
 
@@ -29,9 +30,17 @@ class UsingAble(Terminal):
         """
         return Terminal([*self._parts, Using(method)])
 
+
 class CreateIndex(Buildable):
 
-    def __init__(self, index_name: str, on: str, unique: bool, concurrently: bool, if_not_exists: bool) -> None:
+    def __init__(
+        self,
+        index_name: str,
+        on: str,
+        unique: bool,
+        concurrently: bool,
+        if_not_exists: bool,
+    ) -> None:
         self._index_name = index_name
         self._on = on
         self._unique = unique
@@ -58,7 +67,15 @@ class CreateIndex(Buildable):
 
         return " ".join(parts)
 
-def create_index(index_name: str, on: str, *, unique: bool = False, concurrently: bool = False, if_not_exists: bool = False) -> UsingAble:
+
+def create_index(
+    index_name: str,
+    on: str,
+    *,
+    unique: bool = False,
+    concurrently: bool = False,
+    if_not_exists: bool = False,
+) -> UsingAble:
     """Create an index on a specified table and column.
 
     TODO: link to docs.

@@ -9,6 +9,7 @@ from typing import Literal, NewType
 RoleSpecification = Literal["CURRENT_USER", "SESSION_USER", "CURRENT_ROLE"]
 UserName = NewType("UserName", str)
 
+
 class Authorization(Buildable):
     """Represents an AUTHORIZATION clause of a CREATE SCHEMA statement."""
 
@@ -18,6 +19,7 @@ class Authorization(Buildable):
     def build(self) -> str:
         """Create an AUTHORIZATION clause."""
         return f"authorization {self._role_specification}"
+
 
 class AuthorizationAble(Terminal):
     """Defines the AUTHORIZATION clause of a CREATE SCHEMA statement."""
@@ -30,12 +32,14 @@ class AuthorizationAble(Terminal):
         """
         return Terminal([*self._parts, Authorization(role_specification)])
 
+
 class IfNotExists(Buildable):
     """Represents an IF NOT EXISTS clause of a CREATE SCHEMA statement."""
 
     def build(self) -> str:
         """Create an IF NOT EXISTS clause."""
         return "if not exists"
+
 
 class IfNotExistsAble(AuthorizationAble):
     """Defines the IF NOT EXISTS clause of a CREATE SCHEMA statement."""
@@ -48,7 +52,9 @@ class IfNotExistsAble(AuthorizationAble):
         """
         return AuthorizationAble([*self._parts, IfNotExists()])
 
+
 # TODO: should this just be create_schema("...", if_not_exists=True) ???
+
 
 class CreateSchema(Buildable):
     """Represents a CREATE SCHEMA statement."""
@@ -60,6 +66,7 @@ class CreateSchema(Buildable):
         """Create a CREATE SCHEMA statement."""
         return f"create schema {self._schema_name}"
 
+
 def create_schema(schema_name: str) -> IfNotExistsAble:
     """Create a new schema in the database.
 
@@ -67,4 +74,3 @@ def create_schema(schema_name: str) -> IfNotExistsAble:
     TODO: example usage
     """
     return IfNotExistsAble([CreateSchema(schema_name)])
-

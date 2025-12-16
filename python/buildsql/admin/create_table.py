@@ -8,12 +8,14 @@ from typing import Literal
 
 # TODO: pass in column names, types, constraints
 
+
 class IfNotExists(Buildable):
     """Represents an IF NOT EXISTS clause of a CREATE SCHEMA statement."""
 
     def build(self) -> str:
         """Create an IF NOT EXISTS clause."""
         return "if not exists"
+
 
 class IfNotExistsAble(Terminal):
     """Defines the IF NOT EXISTS clause of a CREATE SCHEMA statement."""
@@ -26,7 +28,9 @@ class IfNotExistsAble(Terminal):
         """
         return Terminal([*self._parts, IfNotExists()])
 
+
 # TODO: Temporary / Temp, Unlogged
+
 
 class GlobalLocal(Buildable):
     """Represents a GLOBAL or LOCAL clause of a CREATE TABLE statement."""
@@ -38,6 +42,7 @@ class GlobalLocal(Buildable):
         """Create a GLOBAL or LOCAL clause."""
         return self._global_local
 
+
 class GlobalLocalAble(IfNotExistsAble):
     """Defines the GLOBAL or LOCAL clause of a CREATE TABLE statement."""
 
@@ -48,7 +53,7 @@ class GlobalLocalAble(IfNotExistsAble):
         TODO: example usage
         """
         return IfNotExistsAble([*self._parts, GlobalLocal("global")])
-    
+
     def local(self) -> IfNotExistsAble:
         """Specify that the table is a LOCAL temporary table.
 
@@ -67,7 +72,7 @@ class CreateTable(Buildable):
     def build(self) -> str:
         """Create a CREATE TABLE statement."""
         return f"create table {self._table_name}"
-    
+
 
 def create_table(table_name: str) -> GlobalLocalAble:
     """Create a CREATE TABLE statement.
@@ -76,5 +81,3 @@ def create_table(table_name: str) -> GlobalLocalAble:
     TODO: example usage
     """
     return GlobalLocalAble([CreateTable(table_name)])
-
-
